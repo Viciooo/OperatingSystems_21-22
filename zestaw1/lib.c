@@ -17,7 +17,7 @@ clock_t st_time, en_time;
 struct tms st_cpu, en_cpu;
 
 void remove_report() {
-    remove("raport2.txt");
+    remove("report2.txt");
 }
 
 void start_timer() {
@@ -30,7 +30,7 @@ void end_timer() {
 
 void get_times(char *name) {
     end_timer();
-    FILE *fp = fopen("raport2.txt", "a");
+    FILE *fp = fopen("report2.txt", "a");
     int tics_in_ms = sysconf(_SC_CLK_TCK);
     double real_time = (double) (en_time - st_time) / tics_in_ms;
     double user_time = (double) (en_cpu.tms_utime - st_cpu.tms_utime) / tics_in_ms;
