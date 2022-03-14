@@ -1,11 +1,3 @@
-# How to build?
-## Two types of build:
-
-- shared
-  - `make main_shared`
-- static
-  - `make main_static`
-
 # How to run?:
 To run my tests write `make test$(number)_$(buildType)`
 for ex. `make test1_static`
