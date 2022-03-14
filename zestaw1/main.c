@@ -21,6 +21,5 @@ int main(int argc, char *argv[]) {
     }
     delete_files();
     free_array();
-    print_array();
     return 0;
 }

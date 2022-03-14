@@ -8,6 +8,6 @@ void remove_report();
 void file_to_array(char *file_name);
 void remove_block(int idx);
 void free_array();
-void print_array();
-
+void get_times(char *name);
+void load_file(char **buffer, char *file_path);
 #endif // LIB_H:

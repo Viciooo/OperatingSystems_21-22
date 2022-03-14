@@ -1,10 +1,7 @@
-
 CC = gcc
-CFLAGS = -g -Wall -Werror
+CFLAGS = -g -Wall -Werror -std=c11
 LIB_PATH = lib
 MAIN_PATH = main
-
-all: static shared
 
 static:
 	$(CC) $(CFLAGS) -c $(LIB_PATH).c -o $(LIB_PATH).o
@@ -25,24 +22,32 @@ main_shared: shared
 
 test1_static:
 	@./main_static "create_table" "1" "wc_files" "small.txt big.txt"
+	valgrind ./main_static "create_table" "1" "wc_files" "small.txt big.txt"
 
 test2_static:
 	@./main_static "create_table" "5" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt"
+	valgrind ./main_static "create_table" "5" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt"
 
 test3_static:
 	@./main_static "create_table" "10" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt"
+	valgrind ./main_static "create_table" "10" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt"
 
 test4_static:
 	@./main_static "create_table" "2" "wc_files" "small.txt big.txt" "wc_files" "small.txt big.txt medium.txt big.txt" "remove_block" "1" "wc_files" "small.txt big.txt medium.txt big.txt"
+	valgrind ./main_static "create_table" "2" "wc_files" "small.txt big.txt" "wc_files" "small.txt big.txt medium.txt big.txt" "remove_block" "1" "wc_files" "small.txt big.txt medium.txt big.txt"
 
 test1_shared:
-	@./main_shared "create_table" "1" "wc_files" "small.txt big.txt"
+	./main_shared "create_table" "1" "wc_files" "small.txt big.txt"
+	valgrind ./main_shared "create_table" "1" "wc_files" "small.txt big.txt"
 
 test2_shared:
 	@./main_shared "create_table" "5" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt"
+	valgrind ./main_shared "create_table" "5" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt"
 
 test3_shared:
 	@./main_shared "create_table" "10" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt"
+	valgrind ./main_shared "create_table" "10" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt" "wc_files" "small.txt big.txt medium.txt small.txt big.txt medium.txt small.txt big.txt medium.txt"
 
 test4_shared:
 	@./main_shared "create_table" "2" "wc_files" "small.txt big.txt" "wc_files" "small.txt big.txt medium.txt big.txt" "remove_block" "1" "wc_files" "small.txt big.txt medium.txt big.txt"
+	valgrind ./main_shared "create_table" "2" "wc_files" "small.txt big.txt" "wc_files" "small.txt big.txt medium.txt big.txt" "remove_block" "1" "wc_files" "small.txt big.txt medium.txt big.txt"

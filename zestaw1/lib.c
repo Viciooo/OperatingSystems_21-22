@@ -115,13 +115,6 @@ void remove_block(int idx) {
     get_times("remove_block");
 }
 
-void print_array() {
-    for (int i = 0; i < table_size; ++i) {
-        if (table[i] != NULL)
-            printf("%s\n", table[i]);
-    }
-}
-
 void free_array() {
     for (int i = 0; i < table_size; ++i) {
         if (table[i] != NULL)
