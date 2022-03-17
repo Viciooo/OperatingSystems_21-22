@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall -Werror -std=c11 $(OPT)
+CFLAGS = -g -Wall -Werror -std=c11
 LIB_PATH = lib
 MAIN_PATH = main
 
