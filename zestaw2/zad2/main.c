@@ -4,14 +4,21 @@
 #include <string.h>
 
 int main(int argc, char *argv[]) {
-    FILE *file_to_read;
-    char char_to_count = argv[1][0];
-    file_to_read = fopen(argv[2], "r");
+    remove_report();
+    start_timer();
+    struct CharOccurrenceCounter result = count_this_char_in_file_fread(argv[2],argv[1][0]);
+    end_timer();
+    get_times("count_this_char_in_file_fread");
+    printf("Fread: Number of lines with char \"%c\" : %d\n", argv[1][0],result.num_of_lines);
+    printf("Fread: Number occurrences of char  \"%c\" : %d\n", argv[1][0],result.num_of_occurrences);
 
-    struct CharOccurrenceCounter result = count_this_char_in_file(file_to_read,char_to_count);
-    printf("Number of lines with char \"%c\" : %d\n", char_to_count,result.num_of_lines);
-    printf("Number occurrences of char  \"%c\" : %d\n", char_to_count,result.num_of_occurrences);
-    fclose(file_to_read);
+    start_timer();
+    result = count_this_char_in_file_read(argv[2],argv[1][0]);
+    end_timer();
+    get_times("count_this_char_in_file_read");
+
+    printf("Read: Number of lines with char \"%c\" : %d\n", argv[1][0],result.num_of_lines);
+    printf("Read: Number occurrences of char  \"%c\" : %d\n", argv[1][0],result.num_of_occurrences);
 
     return 0;
 }

@@ -4,29 +4,32 @@
 #include <string.h>
 
 int main(int argc, char *argv[]) {
-    FILE* file_to_read;
-    FILE* file_to_save;
-    char path[50];
+    remove_report();
+    char file_to_read[50];
+    char file_to_save[50];
 
     if(argv[1] == NULL){
         printf("Enter the path of the file you want to trim of empty lines: ");
-        scanf("%s", path);
-        file_to_read = fopen(path, "r");
+        scanf("%s", file_to_read);
     }else{
-        file_to_read = fopen(argv[1], "r");
+        strcpy (file_to_read, argv[1]);
     }
 
     if(argv[2] == NULL){
         printf("Enter the path of the file you want to save result in: ");
-        scanf("%s", path);
-        file_to_save = fopen(path, "w");
+        scanf("%s", file_to_save);
     }else{
-        file_to_save = fopen(argv[2], "w");
+        strcpy (file_to_save, argv[2]);
     }
+    start_timer();
+    remove_empty_lines_read(file_to_read, file_to_save);
+    end_timer();
+    get_times("remove_empty_lines_read");
 
-    removeEmptyLines(file_to_read, file_to_save);
-    fclose(file_to_read);
-    fclose(file_to_save);
+    start_timer();
+    remove_empty_lines_fread(file_to_read, file_to_save);
+    end_timer();
+    get_times("remove_empty_lines_fread");
 
     return 0;
 }
