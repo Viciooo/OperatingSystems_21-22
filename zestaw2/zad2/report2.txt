@@ -1,2 +1,0 @@
-|  count_this_char_in_file_fread:|        0.030000 |        0.020000 |        0.000000 |
-|   count_this_char_in_file_read:|        0.020000 |        0.000000 |        0.000000 |

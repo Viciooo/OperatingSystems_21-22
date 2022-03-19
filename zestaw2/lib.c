@@ -9,13 +9,14 @@
 #include <sys/times.h>
 #include <unistd.h>
 #include <sys/resource.h>
+
 #define BUFFER_SIZE 256
 
 clock_t st_time, en_time;
 struct tms st_cpu, en_cpu;
 
-void remove_report() {
-    remove("report2.txt");
+void remove_report(char *report_filename) {
+    remove(report_filename);
 }
 
 void start_timer() {
@@ -26,9 +27,9 @@ void end_timer() {
     en_time = times(&en_cpu);
 }
 
-void get_times(char *name) {
+void get_times(char *name,char *report_filename) {
     end_timer();
-    FILE *fp = fopen("report2.txt", "a");
+    FILE *fp = fopen(report_filename, "a");
     int tics_in_ms = sysconf(_SC_CLK_TCK);
     double real_time = (double) (en_time - st_time) / tics_in_ms;
     double user_time = (double) (en_cpu.tms_utime - st_cpu.tms_utime) / tics_in_ms;
@@ -85,16 +86,17 @@ void remove_empty_lines_fread(char *src_filename, char *result_file) {
     int non_ws_char = 0;
     char buffer[BUFFER_SIZE];
     int i = 0;
-//    size_t fwrite( const void * buffer, size_t size, size_t count, FILE * stream );
+
     while (fread(c, 1, 1, file_to_read)) {
         if (!is_ws_char(c[0]))non_ws_char++;
         else if ((c[0] == '\n' || c[0] == '\0')) {
             if (non_ws_char > 0) fwrite(buffer, sizeof(char), i, file_to_write);
-            i = -1; // in order to start from 0 after "resetting" buffer knowing that I increment it below
+            i = 0;
             non_ws_char = 0;
+        } else {
+            buffer[i] = c[0];
+            i++;
         }
-        buffer[i] = c[0];
-        i++;
     }
 
 }

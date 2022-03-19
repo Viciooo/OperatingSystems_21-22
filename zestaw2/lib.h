@@ -5,13 +5,13 @@ struct CharOccurrenceCounter {
     int num_of_lines;
     int num_of_occurrences;
 };
-void remove_report();
+void remove_report(char *report_filename);
 
 void start_timer();
 
 void end_timer();
 
-void get_times(char *name);
+void get_times(char *name,char *report_filename);
 int is_empty(const char *str);
 void remove_empty_lines_read(char *src_filename, char *result_file);
 void remove_empty_lines_fread(char *src_filename, char *result_file);

@@ -4,7 +4,8 @@
 #include <string.h>
 
 int main(int argc, char *argv[]) {
-    remove_report();
+    char *report_filename = "pomiar_zad_1.txt";
+    remove_report(report_filename);
     char file_to_read[50];
     char file_to_save[50];
 
@@ -24,12 +25,12 @@ int main(int argc, char *argv[]) {
     start_timer();
     remove_empty_lines_read(file_to_read, file_to_save);
     end_timer();
-    get_times("remove_empty_lines_read");
+    get_times("remove_empty_lines_read",report_filename);
 
     start_timer();
     remove_empty_lines_fread(file_to_read, file_to_save);
     end_timer();
-    get_times("remove_empty_lines_fread");
+    get_times("remove_empty_lines_fread",report_filename);
 
     return 0;
 }
