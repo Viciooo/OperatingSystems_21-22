@@ -18,5 +18,5 @@ main_static: static
 test1:
 	make clean
 	make main_static
-	valgrind ./main_static ../../../../../
+	valgrind ./main_static ../../
 	make clean

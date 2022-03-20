@@ -2,7 +2,8 @@
 
 #include <stdio.h>
 
-#define _XOPEN_SOURCE_EXTENDED 1
+#define __USE_XOPEN_EXTENDED
+
 #include <stdlib.h>
 
 #include <string.h>
@@ -25,16 +26,15 @@ int LNK = 0;
 int SOCK = 0;
 int WHT = 0;
 
-void print_data_of_file(char *path, int d_type,char *d_name) {
+void print_data_of_file(char *path, int d_type, char *d_name) {
     struct stat buf;
     stat(path, &buf);
+    char real_path[5000];
+    realpath(path, real_path);
 
     printf("------------------------\n");
-    if(d_type == 4){
-        printf("Path: %s%s\n", path,d_name);
-    }else{
-        printf("Path: %s/%s\n", path,d_name);
-    }
+    printf("cmd: %s/%s\n", real_path, d_name);
+
     printf("Number of hardlinks: %ld\n", buf.st_nlink);
 
     switch (d_type) {
@@ -94,7 +94,7 @@ int show_directory_content(char *path) {
     pDirent = readdir(pDir);
 
     while ((pDirent = readdir(pDir)) != NULL) {
-        print_data_of_file(path, pDirent->d_type,pDirent->d_name);
+        print_data_of_file(path, pDirent->d_type, pDirent->d_name);
         if (pDirent->d_type == 4) {
             // 4 is for directory
             char filename[255];
@@ -110,17 +110,17 @@ int show_directory_content(char *path) {
     return 0;
 }
 
-void print_files_stats(){
+void print_files_stats() {
     printf("\n###################################\n");
-    printf("\tUNKNOWN : %d\n",UNKNOWN);
-    printf("\tFIFO : %d\n",FIFO);
-    printf("\tCHR : %d\n",CHR);
-    printf("\tDIR : %d\n",DIR_);
-    printf("\tBLK : %d\n",BLK);
-    printf("\tREG : %d\n",REG);
-    printf("\tLNK : %d\n",LNK);
-    printf("\tSOCK : %d\n",SOCK);
-    printf("\tWHT : %d\n",WHT);
+    printf("\tUNKNOWN : %d\n", UNKNOWN);
+    printf("\tFIFO : %d\n", FIFO);
+    printf("\tCHR : %d\n", CHR);
+    printf("\tDIR : %d\n", DIR_);
+    printf("\tBLK : %d\n", BLK);
+    printf("\tREG : %d\n", REG);
+    printf("\tLNK : %d\n", LNK);
+    printf("\tSOCK : %d\n", SOCK);
+    printf("\tWHT : %d\n", WHT);
     printf("###################################\n");
 }
 
