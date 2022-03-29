@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
             x_i = a + (i - 1) * w;
             result = w * (4 / ((x_i * x_i) + 1));
             char *filename = create_filename_from_int(i);
-            FILE *fp = fopen(filename, "wb");
+            FILE *fp = fopen(filename, "w");
             fprintf(fp, "%f\n", result);
             fclose(fp);
             free(filename);

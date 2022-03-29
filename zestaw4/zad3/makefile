@@ -10,12 +10,12 @@ static:
 	ar rcs lib$(LIB_NAME).a $(LIB_PATH).o
 
 clean:
-	rm -rf *.o *.a *.so main_* $(LIB_PATH).o *.txt
+	rm -rf *.o *.a *.so main_* $(LIB_PATH).o
 
 main_static: static
 	$(CC) $(CFLAGS) -o $(MAIN_PATH)_static $(MAIN_PATH).c $(LIB_PATH).o
 
 test1:
-	make clean
 	make main_static
-	./main_static 20000
+	./main_static 5
+	make clean
