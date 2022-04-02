@@ -17,3 +17,22 @@ Results of ./main_static exec handler:
 Results of ./main_static exec mask:
 SIGUSR1 pending in tha parent:yes
 ______________________________
+Results of ./main_static fork ignore:
+Results of ./main_static fork handler:
+SIGUSR1 ignored in child
+______________________________
+Results of ./main_static fork mask:
+SIGUSR1 pending in tha parent:yes
+______________________________
+SIGUSR1 masked in child
+______________________________
+Results of ./main_static fork pending:
+SIGUSR1 pending in tha parent:yes
+______________________________
+SIGUSR1 pending in tha child:no
+______________________________
+Results of ./main_static exec ignore:
+Results of ./main_static exec handler:
+Results of ./main_static exec mask:
+SIGUSR1 pending in tha parent:yes
+______________________________

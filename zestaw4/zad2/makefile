@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall -Werror -std=c11
+CFLAGS = -Wall
 LIB_PATH = ../lib
 LIB_NAME = lib
 
@@ -15,7 +15,7 @@ clean:
 main_static: static
 	$(CC) $(CFLAGS) -o $(MAIN_PATH)_static $(MAIN_PATH).c $(LIB_PATH).o
 
-test1:
+test:
 	make main_static
-	./main_static 5
+	./main_static
 	make clean
