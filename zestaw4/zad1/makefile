@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall -Werror -std=c11
+CFLAGS = -Wall -Werror -std=c11 -D_GNU_SOURCE
 LIB_PATH = ../lib
 LIB_NAME = lib
 
@@ -15,7 +15,13 @@ clean:
 main_static: static
 	$(CC) $(CFLAGS) -o $(MAIN_PATH)_static $(MAIN_PATH).c $(LIB_PATH).o
 
-test1:
+test:
 	make main_static
-	./main_static 5
+	./main_static fork ignore
+	./main_static fork handler
+	./main_static fork mask
+	./main_static fork pending
+	./main_static exec ignore
+	./main_static exec handler
+	./main_static exec mask
 	make clean
