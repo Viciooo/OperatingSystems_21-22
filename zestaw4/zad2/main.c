@@ -16,7 +16,7 @@ void sigusr1_handler(int signo, siginfo_t *info, void *context){
     }
 
     if(info->si_code == SI_USER){
-        char result[] = "SIGUSR1 tried killing (via kill) real user id:";
+        char result[] = "SIGUSR1 from kill with user id:";
         char tmp[10];
         sprintf(tmp,"%d",info->si_uid);
         strcat(result,tmp);
@@ -40,7 +40,7 @@ void test_case1(void){
 }
 
 void sigchild_handler(int signo, siginfo_t *info, void *context){
-    if(signo != SIGCHLD){ // drugim sygnalem jest SIGCHLD
+    if(signo != SIGCHLD){
         return;
     }
     char result[] = "SIGCHLD received child exit code:";
@@ -76,7 +76,7 @@ int test_case2(void){
 }
 
 void sigsegv_handler(int signo, siginfo_t *info, void *context){
-    if(signo != SIGSEGV){ // trzecim jest SIGSEGV (jakies dzialania z przepelnieniem, dzieleniem przez 0)
+    if(signo != SIGSEGV){
         return;
     }
     char result[] = "Got SIGSEGV at address: ";
