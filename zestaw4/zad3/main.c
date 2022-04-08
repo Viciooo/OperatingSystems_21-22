@@ -1,4 +1,4 @@
-#include "../lib.h"
+#include "../../zestaw5/lib.h"
 
 int main(int argc, char *argv[]) {
 

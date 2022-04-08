@@ -1,4 +1,4 @@
-#include "../lib.h"
+#include "../../zestaw5/lib.h"
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>

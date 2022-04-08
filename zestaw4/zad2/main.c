@@ -1,4 +1,4 @@
-#include "../lib.h"
+#include "../../zestaw5/lib.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -11,10 +11,6 @@
 sigjmp_buf point;
 
 void sigusr1_handler(int signo, siginfo_t *info, void *context){
-    if(signo != SIGUSR1){ // tylko kill SIGUSR1 nas interesuje
-        return;
-    }
-
     if(info->si_code == SI_USER){
         char result[] = "SIGUSR1 from kill with user id:";
         char tmp[10];
@@ -25,9 +21,9 @@ void sigusr1_handler(int signo, siginfo_t *info, void *context){
     }
 }
 
-void test_case1(void){
+void test1(void){
     struct sigaction action;
-    action.sa_sigaction = sigusr1_handler; // instaluje handler
+    action.sa_sigaction = sigusr1_handler;
     action.sa_flags = SA_SIGINFO;
     sigemptyset(&action.sa_mask);
 
@@ -40,9 +36,6 @@ void test_case1(void){
 }
 
 void sigchild_handler(int signo, siginfo_t *info, void *context){
-    if(signo != SIGCHLD){
-        return;
-    }
     char result[] = "SIGCHLD received child exit code:";
     char tmp[10];
     sprintf(tmp,"%d",info->si_status);
@@ -51,7 +44,7 @@ void sigchild_handler(int signo, siginfo_t *info, void *context){
     write(1,result,strlen(result));
 }
 
-int test_case2(void){
+int test2(void){
     struct sigaction action;
     action.sa_sigaction = sigchild_handler;
     action.sa_flags = SA_SIGINFO;
@@ -63,9 +56,6 @@ int test_case2(void){
     }
 
     pid_t pid = fork();
-    if(pid < 0){
-        printf("fork error\n");
-        return 0;
     }else if(pid == 0){
         exit(0xCC);
     }
@@ -76,9 +66,6 @@ int test_case2(void){
 }
 
 void sigsegv_handler(int signo, siginfo_t *info, void *context){
-    if(signo != SIGSEGV){
-        return;
-    }
     char result[] = "Got SIGSEGV at address: ";
     char tmp[100];
     sprintf(tmp,"%p",info->si_addr);
@@ -94,7 +81,7 @@ static void do_segv()
     *p = 1;
 }
 
-void test_case3(void){
+void test3(void){
     struct sigaction sa;
 
     memset(&sa, 0, sizeof(sigaction));
@@ -113,9 +100,8 @@ void test_case3(void){
 }
 
 int main(int argc, char** argv) {
-
-    test_case1();
-    test_case2();
-    test_case3();
+    test1();
+    test2();
+    test3();
     return 0;
 }
