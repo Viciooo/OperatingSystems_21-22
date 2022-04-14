@@ -1,0 +1,4 @@
+skladnik1 = grep 1
+skladnik2 = cat /etc/passwd | head -20
+skladnik3 = wc -l
+skladnik2 | skladnik1 | skladnik3

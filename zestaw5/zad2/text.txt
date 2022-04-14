@@ -1,0 +1,10 @@
+cccc
+abbbb
+1 Napisać program przyjmujący jeden (nadawca lub data) lub trzy argumenty (<adresEmail> <tytuł> <treść>):
+aaaaaa
+2  W przypadku wywołania z jednym argumentem uruchamiany jest (za pomocą popen()) program mail.
+azaaaa
+3 Program użytkownika ma wypisywać listę e-maili posortowaną alfabetycznie wg. adresów e-mail (argument nadawca) lub wg. daty otrzymania e-maili (argument data)
+4 Jeżeli program zostanie wywołany z trzema argumentami, to
+5 (za pomocą popen()) uruchamiany jest program mail i za jego pomocą wysyłany jest e-mail do określonego nadawcy z określonym tematem i treścią
+ddd
