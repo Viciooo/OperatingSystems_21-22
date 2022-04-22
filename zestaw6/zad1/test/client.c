@@ -9,11 +9,11 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "key_generating/keygen.h"
 #include "utils/message.h"
 #include "utils/types.h"
 #include "que/que.h"
 #include "utils/utils.h"
+#include "keygen/keygen.h"
 
 int server_queue, private_queue;
 int friend_queue = -1;
@@ -26,13 +26,7 @@ void send_to_server(message_t *message)
         perror("unable to send message to server");
     }
 }
-//void send_to_friend(message_t *message)
-//{
-//    if (send(friend_queue, message) == -1)
-//    {
-//        perror("unable to send message to friend");
-//    }
-//}
+
 void clean()
 {
     message_t message;
@@ -42,13 +36,7 @@ void clean()
     send_to_server(&message);
     close_queue(server_queue);
     delete_queue(private_queue, get_private_key());
-//    if (friend_queue != -1)
-//    {
-//        message_t message;
-//        message.type = TYPE_DISCONNECT;
-//        message.id = id;
-//        send_to_friend(&message);
-//    }
+
 }
 
 void handle_sigint(int sig)
@@ -85,39 +73,6 @@ void handle_2ALL_send(char* mess) // TODO
     send_to_server(&message);
 }
 
-
-//void handle_disconnect()
-//{
-//
-//    message_t message;
-//    message.type = TYPE_DISCONNECT;
-//    message.id = id;
-//    send_to_friend(&message);
-//    friend_queue = -1;
-//    printf("DISCONNECTED");
-//    send_to_server(&message);
-//}
-//void handle_connect(int connect_id)
-//{
-//    printf("Client %d wants to connect %d\n", id, connect_id);
-//    message_t message;
-//    message.type = TYPE_CONNECT;
-//    message.id = id;
-//    sprintf(message.text, "%d", connect_id);
-//    send_to_server(&message);
-//}
-//void handle_message_send(char *mess) // ? maybe redundant
-//{
-//    message_t message;
-//    message.type = TYPE_MESSAGE;
-//    message.id = id;
-//    sprintf(message.text, "%s", mess);
-//    send_to_friend(&message);
-//    printf("_________\n");
-//    printf("M: %s\n", mess);
-//    printf("_________\n");
-//}
-
 void sender_handle_line(char *command, char *rest)
 {
 
@@ -131,34 +86,27 @@ void sender_handle_line(char *command, char *rest)
     }
     else if (strcmp("2ONE", command) == 0)
     {
-        handle_2ONE_send(rest);
+        int tmp = 0; //TODO FIX
+        handle_2ONE_send(tmp,rest);
     }
     else if (strcmp("2ALL", command) == 0)
     {
         handle_2ALL_send(rest);
     }
-//    else if (strcmp("CONNECT", command) == 0)
-//    {
-//        handle_connect(atoi(rest));
-//    }
-//    else if (strcmp("MESSAGE", command) == 0)
-//    {
-//        handle_message_send(rest);
-//    }
-//    else if (strcmp("DISCONNECT", command) == 0)
-//    {
-//        handle_disconnect();
-//    }
 }
 
 void initialize()
 {
-    if ((server_queue = get_queue(get_public_key())) == -1)
+    key_t key;
+    if ((key = get_public_key()) == -1)
+    {
+        perror("Can't generate public key");
+    }
+    if ((server_queue = get_queue(key)) == -1)
     {
         perror("cant open server queue");
         exit(1);
     }
-
     key_t private_key = get_private_key();
     if ((private_queue = create_queue(private_key)) == -1)
     {
@@ -198,20 +146,6 @@ void sender()
     sender_handle_line(command, rest);
 }
 
-//void handle_connect_from_server(message_t *message)
-//{
-//
-//    int friend;
-//    sscanf(message->text, "%d", &friend);
-//    if (friend != -1)
-//    {
-//        friend_queue = friend;
-//        printf("CONENCT with %d\n", friend_queue);
-//        printf("_____WELCOME IN CHAT_____\n");
-//        return;
-//    }
-//    printf("CAN'T CONENCT with\n");
-//}
 void handle_message(message_t *message)
 {
     printf("_________\n");
@@ -220,12 +154,6 @@ void handle_message(message_t *message)
     printf("F: %s\n", mess);
     printf("_________\n");
 }
-
-//void handle_disconnect_from_server(message_t *message)
-//{
-//    friend_queue = -1;
-//    printf("DISCONNECTED");
-//}
 
 void catcher()
 {
@@ -251,15 +179,6 @@ void catcher()
             case TYPE_2ALL:
                 printf("TYPE_2ALL received\n");
                 break;
-//            case TYPE_CONNECT:
-//                handle_connect_from_server(&message);
-//                break;
-//            case TYPE_MESSAGE:
-//                handle_message(&message);
-//                break;
-//            case TYPE_DISCONNECT:
-//                handle_disconnect_from_server(&message);
-//                break;
             default:
                 break;
             }

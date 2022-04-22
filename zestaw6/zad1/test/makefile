@@ -1,6 +1,6 @@
 CC = gcc
 FLAGS = -std=c99 -Wall
-ESSENTIALS = key_generating/keygen.c que/que.c utils/utils.c
+ESSENTIALS = keygen/keygen.c que/que.c utils/utils.c
 
 all:
 	make server

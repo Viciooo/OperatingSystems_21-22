@@ -8,19 +8,17 @@
 #include <time.h>
 #include <errno.h>
 
-#include "key_generating/keygen.h"
 #include "utils/message.h"
 #include "utils/types.h"
 #include "que/que.h"
 #include "utils/utils.h"
+#include "keygen/keygen.h"
 
 #define MAX_CLIENTS 128
-#define MAX_GROUP 32
 
 int queue;
 
 int clients[MAX_CLIENTS][2];
-int clients_friends[MAX_CLIENTS][2];
 
 int num_clients = 0;
 int clients_tab_size = 0;
@@ -29,7 +27,12 @@ int stops = 0;
 
 void clean()
 {
-    delete_queue(queue, get_public_key());
+    key_t key;
+    if ((key = get_public_key()) == -1)
+    {
+        perror("Can't generate public key");
+    }
+    delete_queue(queue, key);
 }
 
 void send_private(unsigned int client_id, message_t *message)
@@ -65,7 +68,7 @@ void handle_sigint(int sig)
     }
 }
 
-int find_cliend_id()
+int find_client_id()
 {
 
     if (clients_tab_size < MAX_CLIENTS)
@@ -91,7 +94,7 @@ void handle_init(message_t *msg)
     sscanf(msg->text, "%d", &key);
     int pid = msg->pid;
 
-    int cl_id = find_cliend_id();
+    int cl_id = find_client_id();
     if (cl_id != -1)
     {
         if ((clients[cl_id][0] = get_queue(key)) == -1)
@@ -101,7 +104,6 @@ void handle_init(message_t *msg)
         }
 
         clients[cl_id][1] = pid;
-        clients_friends[cl_id][0] = cl_id;
 
         message_t message;
         message.type = TYPE_INIT;
@@ -122,10 +124,6 @@ void init()
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
         clients[i][0] = -1;
-        for (int j = 0; j < 2; ++j)
-        {
-            clients_friends[i][j] = -1;
-        }
     }
 }
 
@@ -136,105 +134,29 @@ void handle_stop(message_t *message)
     {
         perror("cant close client queue\n");
     }
-    int friend = clients_friends[client_id][1];
-    clients_friends[client_id][0] = -1;
-    clients_friends[client_id][1] = -1;
-    if (friend != -1)
-    {
-        clients_friends[friend][1] = -1;
-    }
     clients[client_id][0] = -1;
     num_clients--;
     printf("client: %d stops, clients left: %d\n", client_id, num_clients);
-    if (num_clients == 0 && stops == 1) // TODO not working correctly
-    {
-        exit(0);
-    }
 }
 void handle_list(message_t *message)
 {
     int client_id = message->id;
+    printf("\n------------------------------\n");
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
-        if (clients_friends[i][0] >= 0)
-        {
-            if (i == client_id)
-            {
-                if (clients_friends[i][1] == -1)
-                {
-                    printf("Client %d is available to connect (Me)\n", i);
-                }
-                else
-                {
-                    printf("Client %d is making a conversation right now (Me)\n", i);
-                }
-                continue;
-            }
-            if (clients_friends[i][1] == -1)
-            {
-                printf("Client %d is available to connect\n", i);
-            }
-            else
-            {
-                printf("Client %d is making a conversation right now\n", i);
-            }
+        if(client_id == i){
+            printf("List caller: id %d\n",i);
+        }else{
+            printf("id %d\n",i);
         }
     }
+    printf("------------------------------\n");
 }
-
-//void handle_connect(message_t *message)
-//{
-//    int client_id = message->id;
-//    int connect_id;
-//
-//    sscanf(message->text, "%d", &connect_id);
-//    if (client_id == connect_id)
-//    {
-//        printf("You can't connect with youself\n");
-//        message_t mess;
-//        mess.type = TYPE_CONNECT;
-//        sprintf(mess.text, "%d", -1);
-//        send_private(client_id, &mess);
-//        return;
-//    }
-//
-//    message_t mess;
-//    mess.type = TYPE_CONNECT;
-//    if (clients[connect_id][0] != -1 && clients_friends[connect_id][1] == -1)
-//    {
-//        sprintf(mess.text, "%d", clients[connect_id][0]);
-//    }
-//    else
-//    {
-//        sprintf(mess.text, "%d", -1);
-//        send_private(client_id, &mess);
-//        printf("Can't connect to client: %d\n", connect_id);
-//        return;
-//    }
-//    clients_friends[client_id][1] = connect_id;
-//    clients_friends[connect_id][1] = client_id;
-//    mess.pid = clients[connect_id][1];
-//    send_private(client_id, &mess);
-//    sprintf(mess.text, "%d", clients[client_id][0]);
-//    mess.pid = clients[client_id][1];
-//    send_private(connect_id, &mess);
-//    printf("sent connect confirmation for clients: %d, %d\n", client_id, connect_id);
-//}
-//void handle_disconnect(message_t *message)
-//{
-//
-//    int client_id = message->id;
-//    int second_client = clients_friends[client_id][1];
-//    printf("Disconnecting client %d and %d\n", client_id, second_client);
-//    clients_friends[client_id][1] = -1;
-//    clients_friends[second_client][1] = -1;
-//}
 
 int main(int argc, char *argv[])
 {
 
     init();
-
     atexit(clean);
 
     struct sigaction sa;
@@ -274,11 +196,7 @@ int main(int argc, char *argv[])
             handle_stop(&message);
             break;
         }
-//        case TYPE_DISCONNECT:
-//        {
-//            handle_disconnect(&message);
-//            break;
-//        }
+
         case TYPE_LIST:
         {
             handle_list(&message);
@@ -289,11 +207,6 @@ int main(int argc, char *argv[])
             handle_init(&message);
             break;
         }
-//        case TYPE_CONNECT:
-//        {
-//            handle_connect(&message);
-//            break;
-//        }
 
         default:
         {
