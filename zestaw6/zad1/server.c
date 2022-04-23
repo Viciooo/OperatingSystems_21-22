@@ -14,17 +14,6 @@
 
 #include "helper.h"
 
-void execute_command(struct msg* input, struct msg* output);
-int user_exists(int user_id);
-void send_shutdown_to_all_clients();
-int send_message(int id, struct msg* output, int type);
-void stop_command(struct msg* input, struct msg* output);
-void list_command(struct msg* input, struct msg* output);
-void init_command(struct msg* input, struct msg* output);
-void _2all_command(struct msg* input, struct msg* output);
-void _2one_command(struct msg* input, struct msg* output);
-void handle_SIGINT(int signal_num);
-
 
 void log_to_file(char *text,int client_id){
     FILE *f = fopen("log.txt","a");
@@ -43,118 +32,6 @@ int actual_usr_id = 0;
 int active_users_counter = 0;
 
 int is_server_running = 1;
-
-int main(int argc, char* argv[], char* env[]) {
-    char* homedir = getenv("HOME");
-
-    for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
-        clients_queue_id_arr[i] = -1;
-    }
-
-    key_t msg_queue_key;
-
-    int qid;
-
-    struct msg message, response;
-
-    if ((msg_queue_key = ftok(homedir, PROJ_ID)) == (key_t)-1) {
-        print_sth_and_exit("Server: ERROR while getting key using ftok", 15);
-    }
-
-    if ((qid = msgget(msg_queue_key, IPC_CREAT | QUEUE_PERMISSIONS)) == -1) {
-        print_sth_and_exit("Server: ERROR while creating a queue!", 16);
-    }
-
-    struct sigaction action;
-
-    action.sa_handler = handle_SIGINT;
-
-    sigemptyset(&action.sa_mask);
-    sigaddset(&action.sa_mask, SIGINT);
-
-    action.sa_flags = 0;
-
-    sigaction(SIGINT, &action, NULL);
-
-    print_some_info("Server is running!");
-
-    while (is_server_running) {
-        if (msgrcv(qid, &message, sizeof(struct msg_text), -100, 0) == -1) {
-            if (EINTR != errno) {  // ignore interrupting by SIGINT
-                print_error("Server: ERROR while reading input data!");
-            }
-
-            continue;
-
-        } else {
-            printf(
-                "\033[1;32mServer:\033[0m message received:\n\ttype: %s, id: "
-                "%d, "
-                "message: %s \n",
-                type_to_string(message.msg_type), message.msg_text.id,
-                message.msg_text.buf);
-
-            execute_command(&message, &response);
-        }
-
-        if (message.msg_type == STOP)
-            continue;
-
-        send_message(actual_usr_id, &response, 0);
-    }
-
-
-    // end working of server
-    if (msgctl(qid, IPC_RMID, NULL) == -1) {
-        printf("\033[1;32mServer:\033[0m Error while closing client queue.\n");
-    }
-
-    printf("\033[1;32mServer:\033[0m Server close.\n");
-
-    return 0;
-}
-
-void execute_command(struct msg* input, struct msg* output) {
-    actual_usr_id = input->msg_text.id - SHIFT_ID;
-
-    if (!user_exists(actual_usr_id) && input->msg_type != INIT) {
-        sprintf(output->msg_text.buf, "User DOES NOT exist.");
-
-        output->msg_text.id = SERVER_ID;
-        output->msg_type = ERROR;
-
-        return;
-    }
-
-    switch (input->msg_type) {
-        case STOP: {
-            stop_command(input, output);
-        } break;
-
-        case LIST: {
-            list_command(input, output);
-        } break;
-
-        case INIT: {
-            init_command(input, output);
-        } break;
-
-        case _2ALL: {
-            _2all_command(input, output);
-        } break;
-
-        case _2ONE: {
-            _2one_command(input, output);
-        } break;
-
-        default:
-            break;
-    }
-
-    output->msg_text.id = SERVER_ID;
-
-    output->msg_type = actual_usr_id + SHIFT_ID;
-}
 
 int user_exists(int user_id) {
     if (user_id > next_client_id)
@@ -181,6 +58,28 @@ void prepare_message(struct msg* input, struct msg* output) {
 
     sprintf(output->msg_text.buf, "from %d, %s - %s", actual_usr_id,
             input->msg_text.buf, date);
+}
+
+void send_shutdown_to_all_clients() {
+    struct msg msg;
+
+    msg.msg_text.id = SERVER_ID;
+    msg.msg_type = SHUTDOWN;
+
+    sprintf(msg.msg_text.buf, "STOP");
+
+    for (int i = 0; i < next_client_id; i++) {
+        if (!user_exists(i))
+            continue;
+
+        if (msgsnd(clients_queue_id_arr[i], &msg, sizeof(struct msg_text), 0) ==
+            -1) {
+            print_error("Server: ERROR while sending data!");
+
+        } else {
+            print_some_info("Server: SHUTDOWN signal sent");
+        }
+    }
 }
 
 int send_message(int id, struct msg* output, int type) {
@@ -217,28 +116,6 @@ int get_free_index() {
     return -1;
 }
 
-void send_shutdown_to_all_clients() {
-    struct msg msg;
-
-    msg.msg_text.id = SERVER_ID;
-    msg.msg_type = SHUTDOWN;
-
-    sprintf(msg.msg_text.buf, "STOP");
-
-    for (int i = 0; i < next_client_id; i++) {
-        if (!user_exists(i))
-            continue;
-
-        if (msgsnd(clients_queue_id_arr[i], &msg, sizeof(struct msg_text), 0) ==
-            -1) {
-            print_error("Server: ERROR while sending data!");
-
-        } else {
-            print_some_info("Server: SHUTDOWN signal sent");
-        }
-    }
-}
-
 void handle_SIGINT(int signal_num) {
     print_some_info("Server: Signal SIGINT received");
 
@@ -249,13 +126,6 @@ void handle_SIGINT(int signal_num) {
     }
 }
 
-/*
- * Zgłoszenie zakończenia pracy klienta.
- * Klient wysyła ten komunikat, kiedy kończy pracę, aby serwer mógł usunąć z
- * listy jego kolejkę. Następnie kończy pracę, usuwając swoją kolejkę. Komunikat
- * ten wysyłany jest również, gdy po stronie klienta zostanie wysłany sygnał
- * SIGINT.
- */
 void stop_command(struct msg* input, struct msg* output) {
     // remove queue
 
@@ -272,7 +142,6 @@ void stop_command(struct msg* input, struct msg* output) {
     }
 }
 
-// Zlecenie wypisania listy wszystkich aktywnych klientów
 
 void list_command(struct msg* input, struct msg* output) {
     char item[10];
@@ -328,12 +197,6 @@ void init_command(struct msg* input, struct msg* output) {
     }
 }
 
-/*
- * Zlecenie wysłania komunikatu do wszystkich pozostałych klientów.
- * Klient wysyła ciąg znaków.
- * Serwer wysyła ten ciąg wraz z identyfikatorem klienta-nadawcy oraz aktualną
- * datą do wszystkich pozostałych klientów.
- */
 void _2all_command(struct msg* input, struct msg* output) {
     prepare_message(input, output);
 
@@ -352,12 +215,6 @@ void _2all_command(struct msg* input, struct msg* output) {
             next_client_id - 1);
 }
 
-/*
- * Zlecenie wysłania komunikatu do konkretnego klienta.
- * Klient wysyła ciąg znaków podając jako adresata konkretnego klienta o
- * identyfikatorze z listy aktywnych klientów. Serwer wysyła ten ciąg wraz z
- * identyfikatorem klienta-nadawcy oraz aktualną datą do wskazanego klienta.
- */
 void _2one_command(struct msg* input, struct msg* output) {
     prepare_message(input, output);
 
@@ -380,4 +237,117 @@ void _2one_command(struct msg* input, struct msg* output) {
 
         sprintf(output->msg_text.buf, "2ONE - OK, send message");
     }
+}
+
+void execute_command(struct msg* input, struct msg* output) {
+    actual_usr_id = input->msg_text.id - SHIFT_ID;
+
+    if (!user_exists(actual_usr_id) && input->msg_type != INIT) {
+        sprintf(output->msg_text.buf, "User DOES NOT exist.");
+
+        output->msg_text.id = SERVER_ID;
+        output->msg_type = ERROR;
+
+        return;
+    }
+
+    switch (input->msg_type) {
+        case STOP: {
+            stop_command(input, output);
+        } break;
+
+        case LIST: {
+            list_command(input, output);
+        } break;
+
+        case INIT: {
+            init_command(input, output);
+        } break;
+
+        case _2ALL: {
+            _2all_command(input, output);
+        } break;
+
+        case _2ONE: {
+            _2one_command(input, output);
+        } break;
+
+        default:
+            break;
+    }
+
+    output->msg_text.id = SERVER_ID;
+
+    output->msg_type = actual_usr_id + SHIFT_ID;
+}
+
+
+int main(int argc, char* argv[], char* env[]) {
+    char* homedir = getenv("HOME");
+
+    for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
+        clients_queue_id_arr[i] = -1;
+    }
+
+    key_t msg_queue_key;
+
+    int qid;
+
+    struct msg message, response;
+
+    if ((msg_queue_key = ftok(homedir, PROJ_ID)) == (key_t)-1) {
+        print_sth_and_exit("Server: ERROR while getting key using ftok", 15);
+    }
+
+    if ((qid = msgget(msg_queue_key, IPC_CREAT | QUEUE_PERMISSIONS)) == -1) {
+        print_sth_and_exit("Server: ERROR while creating a queue!", 16);
+    }
+
+    struct sigaction action;
+
+    action.sa_handler = handle_SIGINT;
+
+    sigemptyset(&action.sa_mask);
+    sigaddset(&action.sa_mask, SIGINT);
+
+    action.sa_flags = 0;
+
+    sigaction(SIGINT, &action, NULL);
+
+    print_some_info("Server is running!");
+
+    while (is_server_running) {
+        if (msgrcv(qid, &message, sizeof(struct msg_text), -100, 0) == -1) {
+            if (EINTR != errno) {  // ignore interrupting by SIGINT
+                print_error("Server: ERROR while reading input data!");
+            }
+
+            continue;
+
+        } else {
+            printf(
+                    "\033[1;32mServer:\033[0m message received:\n\ttype: %s, id: "
+                    "%d, "
+                    "message: %s \n",
+                    type_to_string(message.msg_type), message.msg_text.id,
+                    message.msg_text.buf);
+
+            execute_command(&message, &response);
+        }
+
+        if (message.msg_type == STOP)
+            continue;
+
+        send_message(actual_usr_id, &response, 0);
+    }
+
+
+    // end working of server
+    if (msgctl(qid, IPC_RMID, NULL) == -1) {
+        printf("\033[1;32mServer:\033[0m Error while closing client queue.\n");
+    }
+
+    printf("\033[1;32mServer:\033[0m Server close.\n");
+
+    return 0;
 }

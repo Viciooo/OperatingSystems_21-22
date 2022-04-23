@@ -1,40 +1,20 @@
 #ifndef SYSOPY_HELPER_H
 #define SYSOPY_HELPER_H
 
-#define PROJ_ID 'P'
-
+#define PROJ_ID 13
 #define QUEUE_PERMISSIONS 0660
-
 #define SHUTDOWN 30
-
-#define ERROR 404
-
+#define ERROR -100
 #define SERVER_ID -10
-
 #define MAX_CLIENTS_NUMBER 20
-
-#define MAX_GROUP_SIZE 10
-
 #define STOP 10
 #define LIST 11
-#define FRIENDS 12
-
-#define INIT 15
-#define ECHO 16
-#define _2ALL 17
-#define _2FRIENDS 18
-#define _2ONE 19
-
-#define ADD 23
-#define DEL 24
-
+#define INIT 12
+#define _2ALL 13
+#define _2ONE 14
 #define SHIFT_ID 100
-
 #define BUFFER_SIZE 1024
 
-#define EVER \
-    ;        \
-    ;
 
 struct msg_text {
     int id;
@@ -75,37 +55,17 @@ char* type_to_string(int type) {
             return "LIST";
         }
 
-//        case FRIENDS: {
-//            return "FRIENDS";
-//        }
-
         case INIT: {
             return "INIT";
         }
-
-//        case ECHO: {
-//            return "ECHO";
-//        }
 
         case _2ALL: {
             return "2ALL";
         }
 
-//        case _2FRIENDS: {
-//            return "2FRIENDS";
-//        }
-
         case _2ONE: {
             return "2ONE";
         }
-
-//        case ADD: {
-//            return "ADD";
-//        }
-//
-//        case DEL: {
-//            return "DEL";
-//        }
 
         default: { return ""; }
     }
