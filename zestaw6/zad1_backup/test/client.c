@@ -16,7 +16,6 @@
 #include "keygen/keygen.h"
 
 int server_queue, private_queue;
-int friend_queue = -1;
 int id;
 
 void send_to_server(message_t *message)
@@ -36,7 +35,6 @@ void clean()
     send_to_server(&message);
     close_queue(server_queue);
     delete_queue(private_queue, get_private_key());
-
 }
 
 void handle_sigint(int sig)
@@ -57,19 +55,21 @@ void handle_list()
     send_to_server(&message);
 }
 
-void handle_2ONE_send(int receiverID,char* mess) // TODO
+void handle_2ONE_send(char* mess)
 {
     message_t message;
-    message.type = TYPE_LIST;
+    message.type = TYPE_2ONE;
     message.id = id;
+    sprintf(message.text, "%s", mess);
     send_to_server(&message);
 }
 
-void handle_2ALL_send(char* mess) // TODO
+void handle_2ALL_send(char* mess)
 {
     message_t message;
-    message.type = TYPE_LIST;
+    message.type = TYPE_2ALL;
     message.id = id;
+    sprintf(message.text, "%s", mess);
     send_to_server(&message);
 }
 
@@ -86,8 +86,7 @@ void sender_handle_line(char *command, char *rest)
     }
     else if (strcmp("2ONE", command) == 0)
     {
-        int tmp = 0; //TODO FIX
-        handle_2ONE_send(tmp,rest);
+        handle_2ONE_send(rest);
     }
     else if (strcmp("2ALL", command) == 0)
     {
@@ -166,7 +165,6 @@ void catcher()
 
         if (receive_no_wait(private_queue, &message) != -1)
         {
-
             switch (message.type)
             {
             case TYPE_STOP:
@@ -175,9 +173,11 @@ void catcher()
                 break;
             case TYPE_2ONE:
                 printf("TYPE_2ONE received\n");
+                handle_message(&message);
                 break;
             case TYPE_2ALL:
                 printf("TYPE_2ALL received\n");
+                handle_message(&message);
                 break;
             default:
                 break;

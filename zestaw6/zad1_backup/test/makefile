@@ -5,9 +5,7 @@ ESSENTIALS = keygen/keygen.c que/que.c utils/utils.c
 all:
 	make server
 	make client
-make r:
-	make server
-	make client
+
 server:
 	$(CC) $(FLAGS) server.c $(ESSENTIALS) -o server
 

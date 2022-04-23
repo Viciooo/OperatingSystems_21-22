@@ -117,6 +117,11 @@ void handle_init(message_t *msg)
     {
         fprintf(stderr, "clients full error\n");
     }
+    FILE *ptr = fopen("logs.txt.txt","a");
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    fprintf(ptr,"logs.txt: %d-%02d-%02d %02d:%02d:%02d %d INIT\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, msg->id);
+    fclose(ptr);
 }
 
 void init()
@@ -138,18 +143,45 @@ void handle_stop(message_t *message)
     num_clients--;
     printf("client: %d stops, clients left: %d\n", client_id, num_clients);
 }
+
 void handle_list(message_t *message)
 {
     int client_id = message->id;
     printf("\n------------------------------\n");
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
-        if(client_id == i){
-            printf("List caller: id %d\n",i);
-        }else{
-            printf("id %d\n",i);
+        if(clients[i][0] != -1){
+            if(client_id == i){
+                printf("List caller: id %d\n",i);
+            }else{
+                printf("id %d\n",i);
+            }
         }
+
     }
+    printf("------------------------------\n");
+}
+
+void handle_2ALL(message_t *message)
+{
+    int client_id = message->id;
+    printf("2ALL\n%s\n------------------------------\n",message->text);
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if(clients[i][0] != -1 && client_id != i){
+            send_private(i,message);
+            printf("%d\n",i);
+        }
+
+    }
+    printf("------------------------------\n");
+}
+
+void handle_2ONE(message_t *message)
+{
+    int client_id = message->id;
+    printf("2ONE\n%s\n------------------------------\n",message->text);
+    send_private(client_id,message);
     printf("------------------------------\n");
 }
 
@@ -207,6 +239,11 @@ int main(int argc, char *argv[])
             handle_init(&message);
             break;
         }
+            case TYPE_2ALL:
+            {
+                handle_2ALL(&message);
+                break;
+            }
 
         default:
         {

@@ -1,13 +1,13 @@
-CC = gcc
-FLAGS = -g
-main: main.c
-	$(CC) $(FLAGS) main.c -o main.out
+CC = gcc -Wall -ggdb
+
+all: server client
+
+
+client: client.c
+	$(CC) client.c -o ./client
+
+server: server.c
+	$(CC) server.c -o ./server
 
 clean:
-	rm -Rf *.out
-
-test: main
-	./main.out commands.txt
-
-test1: main
-	valgrind ./main.out commands.txt
+	rm -rf *.o server test_server client test_client
